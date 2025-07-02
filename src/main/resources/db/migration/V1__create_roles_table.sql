@@ -1,0 +1,5 @@
+INSERT INTO roles (name) VALUES
+  ('ROLE_BIDDER'),
+  ('ROLE_SELLER'),
+  ('ROLE_ADMIN')
+ON CONFLICT (name) DO NOTHING;
