@@ -5,6 +5,7 @@ import org.aptech.carBidding.dtos.requests.BidRequest;
 import org.aptech.carBidding.dtos.requests.CreateAuctionRequest;
 import org.aptech.carBidding.dtos.response.AuctionDetailResponse;
 import org.aptech.carBidding.dtos.response.AuctionListResponse;
+import org.aptech.carBidding.dtos.response.BidResponse;
 import org.aptech.carBidding.services.AuctionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/auctions")
+@RequestMapping("/api/v1/auctions")
 @RequiredArgsConstructor
 @Validated
 public class AuctionController {
@@ -68,7 +69,7 @@ public class AuctionController {
         auctionService.deleteAuction(id, principal.getUsername());
     }
 
-    /** Only BIDDERs can place bids */
+    /** Only BIDDER can place bids */
     @PostMapping("/{auctionId}/bids")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('BIDDER')")
@@ -79,5 +80,23 @@ public class AuctionController {
     ) {
         // returns the updated auction with the new bid history
         return auctionService.placeBid(auctionId, bidReq, principal.getUsername());
+    }
+
+    /**
+     * GET /api/v1/auctions/me/bids
+     */
+    @GetMapping("/bids/my")
+    @PreAuthorize("isAuthenticated()")
+    public List<BidResponse> getMyBids(@AuthenticationPrincipal UserDetails principal) {
+        return auctionService.findMyBids(principal.getUsername());
+    }
+
+    /**
+     * GET /api/v1/auctions/me/won
+     */
+    @GetMapping("/me/won")
+    @PreAuthorize("isAuthenticated()")
+    public List<BidResponse> getMyWonBids(@AuthenticationPrincipal UserDetails principal) {
+        return auctionService.findMyWonBids(principal.getUsername());
     }
 }

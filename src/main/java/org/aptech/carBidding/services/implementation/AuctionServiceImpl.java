@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,6 +63,7 @@ public class AuctionServiceImpl implements AuctionService {
                 .startTime(req.getStartTime())
                 .endTime(req.getEndTime())
                 .startingPrice(req.getStartingPrice())
+                .isClosed(false)
                 .build();
         auctionRepo.save(a);
         return toDetailDto(a, List.of());
@@ -134,6 +136,26 @@ public class AuctionServiceImpl implements AuctionService {
         return toDetailDto(auction, updatedBids);
 
     }
+
+    @Override
+    public List<BidResponse> findMyBids(String bidderEmail) {
+        return bidsRepo.findByBidderEmailOrderByTimestampDesc(bidderEmail).stream()
+                .map(this::toBidDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BidResponse> findMyWonBids(String bidderEmail) {
+        // find all closed auctions where this user is winner
+        return auctionRepo.findByWinnerEmail(bidderEmail).stream()
+                // each Auction has exactly one “winning” bid: the highest
+                .map(auction -> bidsRepo.findByAuctionOrderByAmountDesc(auction).stream().findFirst())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(this::toBidDto)
+                .collect(Collectors.toList());
+    }
+
 
 
     // --- DTO mappers ---

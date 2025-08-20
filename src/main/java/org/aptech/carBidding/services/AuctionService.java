@@ -4,6 +4,7 @@ import org.aptech.carBidding.dtos.requests.BidRequest;
 import org.aptech.carBidding.dtos.requests.CreateAuctionRequest;
 import org.aptech.carBidding.dtos.response.AuctionDetailResponse;
 import org.aptech.carBidding.dtos.response.AuctionListResponse;
+import org.aptech.carBidding.dtos.response.BidResponse;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface AuctionService {
     void deleteAuction(Long id, String sellerEmail);
     AuctionDetailResponse placeBid(Long auctionId, BidRequest bidReq, String bidderEmail);
 
+    // ← new methods
+    List<BidResponse> findMyBids(String bidderEmail);
+    List<BidResponse> findMyWonBids(String bidderEmail);
 }

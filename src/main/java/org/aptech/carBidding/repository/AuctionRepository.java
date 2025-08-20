@@ -10,4 +10,5 @@ import java.util.List;
 public interface AuctionRepository extends JpaRepository<Auction, Long> {
     /** find only auctions that are still open */
     List<Auction> findByIsClosedFalse();
+    List<Auction> findByWinnerEmail(String winnerEmail);
 }

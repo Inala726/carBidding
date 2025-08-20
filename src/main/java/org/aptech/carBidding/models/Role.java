@@ -32,7 +32,8 @@ public class Role {
      */
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     @Builder.Default
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<User> users = new HashSet<>();
 
 }
-
