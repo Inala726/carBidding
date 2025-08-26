@@ -31,6 +31,9 @@ public class User {
     private String firstName;
     private String lastName;
 
+    @Column(nullable = true)  // Allow null if no image is uploaded (optional)
+    private String imageUrl;  // New field for Cloudinary URL
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status;

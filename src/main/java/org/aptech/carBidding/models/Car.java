@@ -16,6 +16,9 @@ public class Car {
     private int year;
     private String description;
 
+    @Column(nullable = true)  // Allow null if no image is uploaded (optional)
+    private String imageUrl;  // New field for Cloudinary URL
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
