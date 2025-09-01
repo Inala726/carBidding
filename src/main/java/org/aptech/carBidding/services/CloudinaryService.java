@@ -6,5 +6,6 @@ public interface CloudinaryService {
     /**
      * Uploads the given file to Cloudinary and returns the secure URL.
      */
-    String uploadCarImage(MultipartFile file);
+    String uploadImage(MultipartFile file);
+
 }

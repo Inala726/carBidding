@@ -11,9 +11,12 @@ import org.aptech.carBidding.models.User;
 import org.aptech.carBidding.repository.CarRepository;
 import org.aptech.carBidding.repository.UserRepository;
 import org.aptech.carBidding.services.CarService;
+import org.aptech.carBidding.services.CloudinaryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +27,7 @@ public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Override
     public List<CarListResponse> getAllCars() {
@@ -41,15 +45,21 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public CarDetailResponse createCar(CreateCarRequest req, String ownerEmail) {
+    public CarDetailResponse createCar(CreateCarRequest req, MultipartFile image, String ownerEmail) throws IOException {
         User owner = userRepository.findByEmail(ownerEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", ownerEmail));
+
+        String imageUrl = null;
+        if (image != null && !image.isEmpty()) {
+            imageUrl = cloudinaryService.uploadImage(image);
+        }
 
         Car car = Car.builder()
                 .make(req.getMake())
                 .model(req.getModel())
                 .year(req.getYear())
                 .description(req.getDescription())
+                .imageUrl(imageUrl)
                 .owner(owner)
                 .build();
 
@@ -58,7 +68,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public CarDetailResponse updateCar(Long id, CarUpdateRequest req) {
+    public CarDetailResponse updateCar(Long id, CarUpdateRequest req, MultipartFile image) throws IOException {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Car", "id", id));
 
@@ -66,6 +76,12 @@ public class CarServiceImpl implements CarService {
         if (req.getModel() != null) car.setModel(req.getModel());
         if (req.getYear() != null) car.setYear(req.getYear());
         if (req.getDescription() != null) car.setDescription(req.getDescription());
+
+        if (image != null && !image.isEmpty()) {
+            String newImageUrl = cloudinaryService.uploadImage(image);
+            car.setImageUrl(newImageUrl);
+            // Optional: Delete old image from Cloudinary if exists (requires public ID extraction)
+        }
 
         // flush/update happens on transaction commit
         return toDetailDto(car);

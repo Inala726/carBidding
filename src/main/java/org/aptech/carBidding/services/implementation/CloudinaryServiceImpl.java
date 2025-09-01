@@ -16,7 +16,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     private final Cloudinary cloudinary;
 
     @Override
-    public String uploadCarImage(MultipartFile file) {
+    public String uploadImage(MultipartFile file) {
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> uploadResult = cloudinary

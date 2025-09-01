@@ -12,7 +12,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -38,24 +40,26 @@ public class CarController {
     }
 
     /** only SELLER (or ADMIN) can create a car listing */
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('SELLER')")
     public CarDetailResponse create(
-            @RequestBody @Validated CreateCarRequest req,
+            @RequestPart("request") @Validated CreateCarRequest req,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        return carService.createCar(req, userDetails.getUsername());
+    ) throws IOException {
+        return carService.createCar(req, image, userDetails.getUsername());
     }
 
     /** only SELLER (or ADMIN) can update cars */
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('SELLER')")
     public CarDetailResponse update(
             @PathVariable Long id,
-            @RequestBody @Validated CarUpdateRequest req
-    ) {
-        return carService.updateCar(id, req);
+            @RequestPart("request") @Validated CarUpdateRequest req,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws IOException {
+        return carService.updateCar(id, req, image);
     }
 
     /** only SELLER (or ADMIN) can delete cars */

@@ -2,6 +2,7 @@ package org.aptech.carBidding.services.implementation;
 
 
 import lombok.RequiredArgsConstructor;
+import org.aptech.carBidding.services.CloudinaryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.aptech.carBidding.dtos.requests.ProfilePatchRequest;
@@ -12,6 +13,7 @@ import org.aptech.carBidding.exceptions.UserNotFoundException;
 import org.aptech.carBidding.models.User;
 import org.aptech.carBidding.repository.UserRepository;
 import org.aptech.carBidding.services.UserServices;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserServices {
 
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Override
     public List<UserListResponse> getAllUsers() {
@@ -86,6 +89,19 @@ public class UserServiceImpl implements UserServices {
 
         User updated = userRepository.save(user);
         return mapToDetail(updated);
+    }
+
+    @Override
+    @Transactional
+    public String updateProfilePicture(String email, MultipartFile file) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + email));
+
+        String url = cloudinaryService.uploadImage(file);
+        user.setImageUrl(url);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        return url;
     }
 
     private UserDetailResponse mapToDetail(User user) {
